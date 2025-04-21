@@ -106,5 +106,5 @@ print("\n🔎 Pausas largas detectadas:")
 for i, (start, end, dur) in enumerate(pausas_largas, 1):
     print(f"  Pausa {i}: desde {start}s hasta {end}s - duración {dur}s")
 
-print("\n📌 Signos de puntuación en texto:")
+print("\n📌 Signos de puntuación en texto:")    
 print("".join(c if c in '.,;:!?' else " " for c in texto))
