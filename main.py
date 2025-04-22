@@ -10,6 +10,9 @@ from pydub import AudioSegment, silence
 from difflib import SequenceMatcher
 import tempfile
 import openai
+import noisereduce as nr
+import librosa
+import soundfile as sf
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -184,10 +187,34 @@ async def verificar_coincidencia_audio_texto(
         except OSError:
             pass
 
+def reducir_ruido(audio_bytes: bytes) -> bytes:
+    # Cargar el audio
+    y, sr = librosa.load(io.BytesIO(audio_bytes), sr=None)
+
+    # Suponemos que el primer segundo es solo ruido
+    noise_sample = y[:sr]
+
+    # Aplicar reducción de ruido
+    reduced_noise = nr.reduce_noise(y=y, sr=sr, y_noise=noise_sample)
+
+    # Guardar en bytes otra vez
+    out_io = io.BytesIO()
+    sf.write(out_io, reduced_noise, sr, format='WAV')
+    out_io.seek(0)
+
+    return out_io.read()
+
 @app.post("/evaluar-lectura")
 async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
     # Leer y procesar audio
     audio_bytes = await audio.read()
+
+    audio_bytes = reducir_ruido(audio_bytes)
+
+    with open("audio_reducido.wav", "wb") as f:
+        f.write(audio_bytes)
+
+    print("Archivo guardado: audio_reducido.wav")
 
     # Verificar si el audio corresponde al texto
     verificacion = await verificar_coincidencia_audio_texto(audio_bytes, text)
