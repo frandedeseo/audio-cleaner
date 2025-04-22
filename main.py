@@ -1,16 +1,17 @@
 import os
+import io
 import base64
+import json
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from pydub import AudioSegment, silence
 import openai
-import json
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
-
 # Permitir CORS (opcional)
 app.add_middleware(
     CORSMiddleware,
@@ -20,9 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 📌 Rúbrica embebida en el backend
-RUBRICA_EVALUACION = """
-Hola chat, quiero que te situes en la posición de una psicopedagoga. Tenes que evaluar al lector del audio en 5 tópicos distintos y en cada uno clasificarlo en 4 niveles distintos. Ahora te escribo la información para que puedas ejecutar tu tarea de manera correcta:
+# Instrucciones base
+INSTRUCCIONES_SYSTEM = """
+Sos una psicopedagoga experta en evaluación lectora infantil. Vas a recibir dos elementos: 
+un texto que el estudiante debía leer y las métricas de lectura.  
+Tu tarea es analizar la lectura y evaluar el desempeño del estudiante en base a los siguientes 5 criterios, usando esta rúbrica:
 
 Rúbrica de lectura (por niveles de desempeño):
 
@@ -51,59 +54,93 @@ Rúbrica de lectura (por niveles de desempeño):
 • Avanzado: Logra leer párrafos o textos sin errores.
 
 5. Fluidez Lectora (se mide en palabras por minuto)
+• Inicial: 0-50 palabras por minuto.
+• En proceso: 50-90 palabras por minuto.
+• Logrado: 90-130 palabras por minuto.
+• Avanzado: 130-200 palabras por minuto.
 
-Retorna los datos solo con un json de esta forma, quiero que al valor retornado solo haya que hacerle un PARSE y no haya que hacerle ningún otro tipo de tratamiento. El json tiene que tener la siguiente estructura:
+Ejemplo de salida válida:
 {
-  "estrategia_silabica": {
-    "nivel": "...",
-    "comentario": "..."
-  },
-  "manejo_ritmo": {
-    "nivel": "...",
-    "comentario": "..."
-  },
-  "manejo_respiracion": {
-    "nivel": "...",
-    "comentario": "..."
-  },
-  "precision": {
-    "nivel": "...",
-    "comentario": "..."
-  },
-  "fluidez_lectora": {
-    "nivel": "...",
-    "comentario": "..."
-  }
+  "estrategia_silabica": {"nivel": "Logrado", "comentario": "El alumno..."},
+  "manejo_ritmo": {"nivel": "En proceso", "comentario": "Lee de forma monótona..."},
+  "manejo_respiracion": {"nivel": "Inicial", "comentario": "No hace pausas en puntos..."},
+  "precision": {"nivel": "Avanzado", "comentario": "Lee sin errores..."},
+  "fluidez_lectora": {"nivel": "En proceso", "comentario": "80 palabras en 1m20s => 60 WPM"}
 }
-Los espacios donde hay ... son para que el modelo complete con la evaluación.
-IMPORTANTE: Asegurate de que el JSON no esté envuelto en comillas ni tenga triple comillas ni etiquetas como ```json.
-Cada clave debe aparecer solo una vez. No repitas claves como "comentario". Solo una por cada campo.
-El JSON debe ser válido y parseable sin necesidad de limpieza.
+
+IMPORTANTE: Devuelve **solo** este objeto JSON, sin texto libre, sin claves extra, sin comillas alrededor del json.
 """
 
-@app.post("/evaluar-lectura")
-async def evaluar_lectura(
-    text: str = Form(...),
-    audio: UploadFile = File(...)
-):
-    # Leer los bytes del archivo
-    audio_bytes = await audio.read()
+# Función para calcular duración activa y WPM
 
-    # Convertir audio a Base64
-    base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+def calcular_duracion_activa(audio_bytes: bytes,
+                              min_silence_len: int = 2000,
+                              silence_thresh: int = -70) -> float:
+    
+    audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
+    silent_ranges = silence.detect_silence(audio,
+                                           min_silence_len=min_silence_len,
+                                           silence_thresh=silence_thresh)
+    total_silence = sum((end - start) for start, end in silent_ranges)
+    duracion_total_ms = len(audio)
+    print(total_silence)
+    print(f"Duración total: {duracion_total_ms / 1000:.2f} segundos")
+    duracion_activa_ms = max(0, duracion_total_ms - total_silence)
+    return duracion_activa_ms / 1000  # en segundos
 
-    # Construir mensajes para GPT-4o Audio Preview #
-    messages = [
-        {
-            "role": "system",
-            "content": "Sos una psicopedagoga experta en evaluación lectora. Vas a recibir un texto, un audio y una rúbrica para emitir una evaluación precisa en base a los criterios."
+# Esquema de función para forcing JSON
+EVALUAR_FUNC = {
+    "name": "evaluar_lectura",
+    "description": "Devuelve evaluación según rúbrica de lectura infantil",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "estrategia_silabica": {"type": "object",
+                "properties": {"nivel": {"type": "string"}, "comentario": {"type": "string"}},
+                "required": ["nivel","comentario"]
+            },
+            "manejo_ritmo": {"type": "object",
+                "properties": {"nivel": {"type": "string"}, "comentario": {"type": "string"}},
+                "required": ["nivel","comentario"]
+            },
+            "manejo_respiracion": {"type": "object",
+                "properties": {"nivel": {"type": "string"}, "comentario": {"type": "string"}},
+                "required": ["nivel","comentario"]
+            },
+            "precision": {"type": "object",
+                "properties": {"nivel": {"type": "string"}, "comentario": {"type": "string"}},
+                "required": ["nivel","comentario"]
+            },
+            "fluidez_lectora": {"type": "object",
+                "properties": {"nivel": {"type": "string"}, "comentario": {"type": "string"}},
+                "required": ["nivel","comentario"]
+            }
         },
+        "required": ["estrategia_silabica","manejo_ritmo","manejo_respiracion","precision","fluidez_lectora"]
+    }
+}
+
+@app.post("/evaluar-lectura")
+async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
+    # Leer y procesar audio
+    audio_bytes = await audio.read()
+    base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
+    duracion_activa = calcular_duracion_activa(audio_bytes)
+    print(f"Duración activa: {duracion_activa:.2f} segundos")
+    cant_palabras = len(text.split())
+    print(cant_palabras)
+    wpm = cant_palabras / (duracion_activa / 60) if duracion_activa > 0 else 0
+    print(f"WPM: {wpm:.1f}")
+
+    # Preparar llamada
+    messages = [
+        {"role": "system", "content": INSTRUCCIONES_SYSTEM},
         {
             "role": "user",
             "content": [
                 {
                     "type": "text",
-                    "text": f"{RUBRICA_EVALUACION}\n\nTexto que el estudiante debía leer:\n{text}\n"
+                    "text": f"Texto a leer: {text}\nWPM: {wpm:.1f}"
                 },
                 {
                     "type": "input_audio",
@@ -113,31 +150,18 @@ async def evaluar_lectura(
                     }
                 }
             ]
-        }
+        },
     ]
-    print("hola")
 
     response = openai.chat.completions.create(
         model="gpt-4o-audio-preview",
         modalities=["text", "audio"],
         audio={"voice": "alloy", "format": "wav"},
         messages=messages,
+        functions=[EVALUAR_FUNC],
+        function_call={"name": "evaluar_lectura"},
+        temperature=0
     )
-    raw = response.choices[0].message.audio.transcript.strip()
-
-    # Remove markdown artifacts
-    if raw.startswith("```json"):
-        raw = raw[7:]
-    if raw.endswith("```"):
-        raw = raw[:-3]
-    raw = raw.strip()
-
-    import json
-    try:
-        parsed = json.loads(raw)
-    except json.JSONDecodeError as e:
-        return {"error": "Failed to parse cleaned GPT response", "details": str(e), "raw": raw}
-
-    return parsed
-
+    args = response.choices[0].message.function_call.arguments
+    return json.loads(args)
 
