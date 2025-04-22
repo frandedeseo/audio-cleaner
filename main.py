@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import openai
+import json
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -51,7 +52,7 @@ Rúbrica de lectura (por niveles de desempeño):
 
 5. Fluidez Lectora (se mide en palabras por minuto)
 
-Retorna los datos solo con un json de esta forma:
+Retorna los datos solo con un json de esta forma, quiero que al valor retornado solo haya que hacerle un PARSE y no haya que hacerle ningún otro tipo de tratamiento. El json tiene que tener la siguiente estructura:
 {
   "estrategia_silabica": {
     "nivel": "...",
@@ -75,7 +76,9 @@ Retorna los datos solo con un json de esta forma:
   }
 }
 Los espacios donde hay ... son para que el modelo complete con la evaluación.
-
+IMPORTANTE: Asegurate de que el JSON no esté envuelto en comillas ni tenga triple comillas ni etiquetas como ```json.
+Cada clave debe aparecer solo una vez. No repitas claves como "comentario". Solo una por cada campo.
+El JSON debe ser válido y parseable sin necesidad de limpieza.
 """
 
 @app.post("/evaluar-lectura")
@@ -89,7 +92,7 @@ async def evaluar_lectura(
     # Convertir audio a Base64
     base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
 
-    # Construir mensajes para GPT-4o Audio Preview
+    # Construir mensajes para GPT-4o Audio Preview #
     messages = [
         {
             "role": "system",
@@ -112,6 +115,7 @@ async def evaluar_lectura(
             ]
         }
     ]
+    print("hola")
 
     response = openai.chat.completions.create(
         model="gpt-4o-audio-preview",
@@ -119,9 +123,21 @@ async def evaluar_lectura(
         audio={"voice": "alloy", "format": "wav"},
         messages=messages,
     )
+    raw = response.choices[0].message.audio.transcript.strip()
 
-    return {
-        "evaluacion": response.choices[0].message.audio.transcript
-    }
+    # Remove markdown artifacts
+    if raw.startswith("```json"):
+        raw = raw[7:]
+    if raw.endswith("```"):
+        raw = raw[:-3]
+    raw = raw.strip()
+
+    import json
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return {"error": "Failed to parse cleaned GPT response", "details": str(e), "raw": raw}
+
+    return parsed
 
 
