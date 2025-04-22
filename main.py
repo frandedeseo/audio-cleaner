@@ -6,6 +6,8 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydub import AudioSegment, silence
+from difflib import SequenceMatcher
+import tempfile
 import openai
 
 load_dotenv()
@@ -71,23 +73,6 @@ Ejemplo de salida válida:
 IMPORTANTE: Devuelve **solo** este objeto JSON, sin texto libre, sin claves extra, sin comillas alrededor del json.
 """
 
-# Función para calcular duración activa y WPM
-
-def calcular_duracion_activa(audio_bytes: bytes,
-                              min_silence_len: int = 2000,
-                              silence_thresh: int = -70) -> float:
-    
-    audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
-    silent_ranges = silence.detect_silence(audio,
-                                           min_silence_len=min_silence_len,
-                                           silence_thresh=silence_thresh)
-    total_silence = sum((end - start) for start, end in silent_ranges)
-    duracion_total_ms = len(audio)
-    print(total_silence)
-    print(f"Duración total: {duracion_total_ms / 1000:.2f} segundos")
-    duracion_activa_ms = max(0, duracion_total_ms - total_silence)
-    return duracion_activa_ms / 1000  # en segundos
-
 # Esquema de función para forcing JSON
 EVALUAR_FUNC = {
     "name": "evaluar_lectura",
@@ -120,17 +105,76 @@ EVALUAR_FUNC = {
     }
 }
 
+
+# Función para calcular duración activa y WPM
+def getWpm(audio_bytes: bytes,
+                             text: str,
+                              min_silence_len: int = 2000,
+                              silence_thresh: int = -70) -> float:
+    
+    audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
+    silent_ranges = silence.detect_silence(audio,
+                                           min_silence_len=min_silence_len,
+                                           silence_thresh=silence_thresh)
+    total_silence = sum((end - start) for start, end in silent_ranges)
+    duracion_total_ms = len(audio)
+    duracion_activa_s = max(0, duracion_total_ms - total_silence) / 1000  # en segundos
+    cant_palabras = len(text.split())
+    wpm = cant_palabras / (duracion_activa_s / 60) if duracion_activa_s > 0 else 0
+    return wpm
+
+def text_similarity(a: str, b: str) -> float:
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+
+async def verificar_coincidencia_audio_texto(audio_bytes: bytes, texto_proporcionado: str, umbral: float = 0.7):
+    # Guardar el audio en un archivo temporal con extensión .wav
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(audio_bytes)
+        tmp_path = tmp.name
+
+    # Enviar archivo a Whisper para transcripción
+    with open(tmp_path, "rb") as f:
+        transcription = openai.audio.transcriptions.create(
+            model="whisper-1",
+            file=f
+        )
+    print(transcription)
+    transcript_text = transcription.text
+
+    # Calcular similaridad
+    similarity = text_similarity(transcript_text, texto_proporcionado)
+
+    # Verificar si está por debajo del umbral
+    if similarity < umbral:
+        return {
+            "match": False,
+            "similaridad": similarity,
+            "transcripcion": transcript_text
+        }
+
+    return {
+        "match": True,
+        "similaridad": similarity,
+        "transcripcion": transcript_text
+    }
+
 @app.post("/evaluar-lectura")
 async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
     # Leer y procesar audio
     audio_bytes = await audio.read()
+
+    # Verificar si el audio corresponde al texto
+    verificacion = await verificar_coincidencia_audio_texto(audio_bytes, text)
+    if not verificacion["match"]:
+        return {
+            "error": "El texto proporcionado no coincide con el audio.",
+            "similaridad": verificacion["similaridad"],
+            "transcripcion_detectada": verificacion["transcripcion"]
+        }
+
     base64_audio = base64.b64encode(audio_bytes).decode('utf-8')
-    duracion_activa = calcular_duracion_activa(audio_bytes)
-    print(f"Duración activa: {duracion_activa:.2f} segundos")
-    cant_palabras = len(text.split())
-    print(cant_palabras)
-    wpm = cant_palabras / (duracion_activa / 60) if duracion_activa > 0 else 0
-    print(f"WPM: {wpm:.1f}")
+    wpm = getWpm(audio_bytes, text)
+
 
     # Preparar llamada
     messages = [
