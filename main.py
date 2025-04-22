@@ -1,4 +1,5 @@
 import os
+import re
 import io
 import base64
 import json
@@ -123,40 +124,65 @@ def getWpm(audio_bytes: bytes,
     wpm = cant_palabras / (duracion_activa_s / 60) if duracion_activa_s > 0 else 0
     return wpm
 
-def text_similarity(a: str, b: str) -> float:
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+def limpiar_texto(texto: str) -> str:
+    # minúsculas
+    texto = texto.lower()
+    # quita puntuación
+    texto = re.sub(r"[^\w\sáéíóúüñ]", "", texto)
+    # unifica espacios
+    texto = re.sub(r"\s+", " ", texto)
+    return texto.strip()
 
-async def verificar_coincidencia_audio_texto(audio_bytes: bytes, texto_proporcionado: str, umbral: float = 0.7):
-    # Guardar el audio en un archivo temporal con extensión .wav
+def text_similarity(a: str, b: str) -> float:
+    return SequenceMatcher(None, a, b).ratio()
+
+async def verificar_coincidencia_audio_texto(
+    audio_bytes: bytes,
+    texto_proporcionado: str,
+    umbral: float = 0.45
+):
+    # 1) Guardar audio en temp file con extensión
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
 
-    # Enviar archivo a Whisper para transcripción
-    with open(tmp_path, "rb") as f:
-        transcription = openai.audio.transcriptions.create(
-            model="whisper-1",
-            file=f
-        )
-    print(transcription)
-    transcript_text = transcription.text
+    try:
+        # 2) Abrir y enviar a Whisper
+        with open(tmp_path, "rb") as f:
+            transcription = openai.audio.transcriptions.create(
+                model="whisper-1",
+                file=f
+            )
+        transcript_text = transcription.text
 
-    # Calcular similaridad
-    similarity = text_similarity(transcript_text, texto_proporcionado)
+        # 3) Limpiar ambos textos
+        cleaned_transcript = limpiar_texto(transcript_text)
+        cleaned_provided = limpiar_texto(texto_proporcionado)
+        print("Transcript: ", cleaned_transcript)
+        print("Provided: ", cleaned_provided)
 
-    # Verificar si está por debajo del umbral
-    if similarity < umbral:
+        # 4) Calcular similaridad
+        similarity = text_similarity(cleaned_transcript, cleaned_provided)
+
+        if similarity < umbral:
+            return {
+                "match": False,
+                "similaridad": similarity,
+                "transcripcion": transcript_text
+            }
+
         return {
-            "match": False,
+            "match": True,
             "similaridad": similarity,
             "transcripcion": transcript_text
         }
 
-    return {
-        "match": True,
-        "similaridad": similarity,
-        "transcripcion": transcript_text
-    }
+    finally:
+        # 5) Limpieza del archivo temporal
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
 @app.post("/evaluar-lectura")
 async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
