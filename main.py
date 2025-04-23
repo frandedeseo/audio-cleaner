@@ -1,4 +1,5 @@
 import os
+#os.environ["SPEECHBRAIN_LOCAL_DOWNLOAD"] = "True"
 import re
 import io
 import base64
@@ -13,6 +14,9 @@ import openai
 import noisereduce as nr
 import librosa
 import soundfile as sf
+import torchaudio
+from speechbrain.utils.fetching import LocalStrategy
+from speechbrain.inference.separation import SepformerSeparation
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -204,19 +208,57 @@ def reducir_ruido(audio_bytes: bytes) -> bytes:
 
     return out_io.read()
 
+# separator = SepformerSeparation.from_hparams(
+#     source="speechbrain/sepformer-whamr",
+#     savedir="tmpdir",
+#     local_strategy=LocalStrategy.COPY,      # fuerza copia, no symlink
+#     run_opts={"use_symlink": False},        # respaldo
+# )
+
+# def separar_voces(audio_bytes: bytes) -> bytes:
+
+#     # Guardar los bytes en archivo temporal
+#     with open("temp_input.wav", "wb") as f:
+#         f.write(audio_bytes)
+
+#     # Cargar audio y convertir a 8 kHz si es necesario
+#     waveform, sample_rate = torchaudio.load("temp_input.wav")
+#     if sample_rate != 8000:
+#         waveform = torchaudio.functional.resample(waveform, orig_freq=sample_rate, new_freq=8000)
+#         sample_rate = 8000
+
+#     # Guardar el waveform re-sampleado
+#     torchaudio.save("temp_input_resampled.wav", waveform, sample_rate)
+
+#     # Separar fuentes de audio
+#     est_sources = separator.separate_file(path="temp_input_resampled.wav")
+
+#     # Seleccionar fuente con mayor energía
+#     energy_1 = est_sources[:, :, 0].pow(2).mean()
+#     energy_2 = est_sources[:, :, 1].pow(2).mean()
+#     voz_cercana = est_sources[:, :, 0] if energy_1 > energy_2 else est_sources[:, :, 1]
+
+#     # Guardar resultado en buffer
+#     buffer = io.BytesIO()
+#     torchaudio.save(buffer, voz_cercana.detach().cpu(), 8000, format='wav')
+#     buffer.seek(0)
+#     return buffer.read()
+
 @app.post("/evaluar-lectura")
 async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
     # Leer y procesar audio
     audio_bytes = await audio.read()
 
-    audio_bytes = reducir_ruido(audio_bytes)
+    #audio_bytes = separar_voces(audio_bytes)
+
+    #audio_bytes = reducir_ruido(audio_bytes)
 
     with open("audio_reducido.wav", "wb") as f:
         f.write(audio_bytes)
 
-    print("Archivo guardado: audio_reducido.wav")
+    print("Archivo guardado: audio_reducido.wav")#
 
-    # Verificar si el audio corresponde al texto
+    #Verificar si el audio corresponde al texto
     verificacion = await verificar_coincidencia_audio_texto(audio_bytes, text)
     if not verificacion["match"]:
         return {
