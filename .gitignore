@@ -1,2 +1,5 @@
 /.history
 .env
+/tmpdir
+/__pycache__
+audio_reducido.wav
