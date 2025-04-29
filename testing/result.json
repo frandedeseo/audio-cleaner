@@ -1,0 +1,57 @@
+[
+  {
+    "audio": "19724.wav",
+    "text": "Los delfines son un tipo de mamíferos cetáceos. Pueden vivir más de treinta años en cautividad y tienen una longitud de tres coma cinco metros aproximadamente. En la naturaleza, estos nadadores elegantes pueden alcanzar velocidades de más de treinta kilómetros por hora. Durante sus desplazamientos surgen a menudo a la superficie del mar para respirar, haciéndolo una media de dos o tres veces por minuto.",
+    "output": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "Logrado",
+      "manejo_respiracion": "Logrado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "19805.wav",
+    "text": "El avestruz está dotado de un apetito insaciable. Puede llenar su estómago de los alimentos más disparatados.  Es vegetariana pero muy selectiva.  Prefiere los granos, frutos y flores a las hierbas. Ingiere también piedras para triturar los alimentos y facilitar la digestión. Es activa incluso al mediodía, a las horas de máximo calor, ya que no le hace falta descansar a la sombra como los antílopes y otros mamíferos.",
+    "output": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "20725.wav",
+    "text": "Los perros tienen muy buen olfato y oído. Es un animal inteligente y fiel. Es el mejor amigo del hombre.",
+    "output": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "20727.wav",
+    "text": "El búho es un ave de comportamiento nocturno. Por lo tanto, al haber escasez de luz, intercepta a sus presas a través del sonido. Es famoso y conocido por permanecer despierto durante la noche y descansar de día. A diferencia de las lechuzas, los búhos poseen plumas sobre su cabeza que son confundidas con orejas. La lechuza no posee estas plumas.",
+    "output": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "En proceso"
+    }
+  },
+  {
+    "audio": "20729.wav",
+    "text": "El búho es un ave de comportamiento nocturno. Por lo tanto, al haber escasez de luz, intercepta a sus presas a través del sonido. Es famoso y conocido por permanecer despierto durante la noche y descansar de día. A diferencia de las lechuzas, los búhos poseen plumas sobre su cabeza que son confundidas con orejas. La lechuza no posee estas plumas.",
+    "output": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "Logrado"
+    }
+  }
+]

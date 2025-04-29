@@ -1,0 +1,92 @@
+[
+  {
+    "audio": "19724.wav",
+    "accuracy": 0.4,
+    "predicted": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    },
+    "true": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "Logrado",
+      "manejo_respiracion": "Logrado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "19805.wav",
+    "accuracy": 1.0,
+    "predicted": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    },
+    "true": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "20725.wav",
+    "accuracy": 0.4,
+    "predicted": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "Logrado",
+      "precision": "En proceso",
+      "fluidez_lectora": "Avanzado"
+    },
+    "true": {
+      "estrategia_silabica": "Avanzado",
+      "manejo_ritmo": "Avanzado",
+      "manejo_respiracion": "Avanzado",
+      "precision": "Avanzado",
+      "fluidez_lectora": "Avanzado"
+    }
+  },
+  {
+    "audio": "20727.wav",
+    "accuracy": 0.8,
+    "predicted": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "En proceso"
+    },
+    "true": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "En proceso"
+    }
+  },
+  {
+    "audio": "20729.wav",
+    "accuracy": 1.0,
+    "predicted": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "Logrado"
+    },
+    "true": {
+      "estrategia_silabica": "Logrado",
+      "manejo_ritmo": "En proceso",
+      "manejo_respiracion": "En proceso",
+      "precision": "Logrado",
+      "fluidez_lectora": "Logrado"
+    }
+  }
+]
