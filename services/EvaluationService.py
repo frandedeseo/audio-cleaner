@@ -2,14 +2,14 @@ from fastapi import UploadFile
 from .TextAudioEquivalentService import TextAudioEquivalentService
 from .WpmService import WpmService
 from .GptService import GptService
-from .Repository import Repository
+from repository.Load import Load # Corrected "respository" to "repository"
 
 class EvaluationService:
     def __init__(self):
         self.text_audio = TextAudioEquivalentService()
         self.wpm = WpmService()
         self.gpt = GptService()
-        self.repo = Repository()
+        self.repo = Load()
 
     async def handle(self, text: str, audio: UploadFile):
         audio_bytes = await audio.read()

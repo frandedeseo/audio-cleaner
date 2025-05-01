@@ -9,7 +9,7 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Instrucciones base
-INSTRUCCIONES_SYSTEM = """
+SYSTEM_INSTRUCTIONS = """
 Sos una psicopedagoga experta en evaluación lectora infantil. Vas a recibir dos elementos: 
 un texto que el estudiante debía leer y las métricas de lectura.  
 Tu tarea es analizar la lectura y evaluar el desempeño del estudiante en base a los siguientes 5 criterios, usando esta rúbrica:
