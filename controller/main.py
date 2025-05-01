@@ -14,9 +14,13 @@ import openai
 import noisereduce as nr
 import librosa
 import soundfile as sf
+from pymongo import MongoClient
+import boto3
+from datetime import datetime
 import torchaudio
 from speechbrain.utils.fetching import LocalStrategy
 from speechbrain.inference.separation import SepformerSeparation
+import gridfs
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -244,10 +248,23 @@ def reducir_ruido(audio_bytes: bytes) -> bytes:
 #     buffer.seek(0)
 #     return buffer.read()
 
+# ——————————————————————————————
+# 📦  Configure your Mongo + S3 clients
+# ——————————————————————————————
+
+MONGO_URI = os.getenv("MONGO_URI")
+mongo = MongoClient(MONGO_URI)
+db = mongo["lecturas_db"]
+evaluaciones = db["evaluaciones"]
+
+fs = gridfs.GridFS(db)
+
 @app.post("/evaluar-lectura")
 async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
     # Leer y procesar audio
     audio_bytes = await audio.read()
+
+    original_filename = audio.filename 
 
     #audio_bytes = separar_voces(audio_bytes)
 
@@ -301,6 +318,25 @@ async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
         function_call={"name": "evaluar_lectura"},
         temperature=0
     )
-    args = response.choices[0].message.function_call.arguments
-    return json.loads(args)
+    func_args  = json.loads(response.choices[0].message.function_call.arguments)
+
+    # Guardar audio en GridFS
+    audio_id = fs.put(audio_bytes, filename=original_filename)
+
+    # Armar documento de evaluación
+    documento = {
+        "texto_original": text,
+        "transcripcion_detectada": verificacion["transcripcion"],
+        "similaridad": verificacion["similaridad"],
+        "evaluacion": func_args,
+        "palabras_por_minuto": round(wpm, 2),
+        "filename": original_filename,
+        "audio_file_id": audio_id,  # Referencia al archivo en GridFS
+        "fecha": datetime.now(),  # Reemplazado datetime.utcnow() con datetime.now()
+    }
+
+    # Insertar en la colección
+    evaluaciones.insert_one(documento)
+
+    return func_args
 
