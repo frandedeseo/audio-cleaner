@@ -1,7 +1,7 @@
 import io
 import torchaudio
-from speechbrain.pretrained import SepformerSeparation
-from speechbrain.utils.data_utils import LocalStrategy
+from speechbrain.inference.separation import SepformerSeparation
+from speechbrain.utils.fetching import LocalStrategy
 
 class VoiceSeparatorService:
     def __init__(self):

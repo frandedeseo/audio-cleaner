@@ -1,0 +1,42 @@
+[
+  {
+    "audio": [
+      "20727.wav",
+      "20740.wav",
+      "20743.wav",
+      "20729.wav",
+      "20730.wav",
+      "20731.wav",
+      "20732.wav",
+      "20733.wav",
+      "20734.wav",
+      "20735.wav",
+      "20736.wav",
+      "20741.wav",
+      "20744.wav",
+      "20745.wav",
+      "20748.wav"
+    ],
+    "text": "El búho es un ave de comportamiento nocturno. Por lo tanto, al haber escasez de luz, intercepta a sus presas a través del sonido. Es famoso y conocido por permanecer despierto durante la noche y descansar de día. A diferencia de las lechuzas, los búhos poseen plumas sobre su cabeza que son confundidas con orejas. La lechuza no posee estas plumas."
+  },
+  {
+    "audio": ["19724.wav"],
+    "text": "Los delfines son un tipo de mamíferos cetáceos. Pueden vivir más de treinta años en cautividad y tienen una longitud de tres coma cinco metros aproximadamente. En la naturaleza, estos nadadores elegantes pueden alcanzar velocidades de más de treinta kilómetros por hora. Durante sus desplazamientos surgen a menudo a la superficie del mar para respirar, haciéndolo una media de dos o tres veces por minuto."
+  },
+  {
+    "audio": ["19805.wav", "19833.wav", "19843.wav", "20162.wav", "20271.wav", "20708.wav"],
+    "text": "El avestruz está dotado de un apetito insaciable. Puede llenar su estómago de los alimentos más disparatados.  Es vegetariana pero muy selectiva.  Prefiere los granos, frutos y flores a las hierbas. Ingiere también piedras para triturar los alimentos y facilitar la digestión. Es activa incluso al mediodía, a las horas de máximo calor, ya que no le hace falta descansar a la sombra como los antílopes y otros mamíferos."
+  },
+  {
+    "audio": ["19699.wav", "19706.wav", "19707.wav"],
+    "text": "Los dinosaurios son animales que vivieron en la tierra hace muchos años. Eran animales salvajes, muy feroces y peligrosos. El Tiranosaurio Rex era uno de los dinosaurios más conocidos. Era un animal de gran tamaño. Tenía dientes muy filosos y grandes garras para atrapar a sus presas."
+  },
+  {
+    "audio": ["20725.wav"],
+    "text": "Los perros tienen muy buen olfato y oído. Es un animal inteligente y fiel. Es el mejor amigo del hombre."
+  },
+  {
+    "audio": ["20750.wav", "20751.wav", "20752.wav", "20753.wav", "20754.wav", "20755.wav"],
+    "text": "La corteza terrestre es la capa externa del planeta tierra, donde nosotros vivimos. Está dividida en placas que se denominan  tectónicas. Los sismos o terremotos se producen a causa de movimientos de las placas tectónicas de la corteza terrestre. Cuando estas enormes masas de tierra se chocan o se desliza, se libera energía que provoca estas sacudidas terrestres"
+  }
+]
