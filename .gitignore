@@ -3,3 +3,4 @@
 /tmpdir
 /__pycache__
 audio_reducido.wav
+__pycache__/
