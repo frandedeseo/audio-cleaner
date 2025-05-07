@@ -20,3 +20,8 @@ async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello from FastAPI on Vercel"}
