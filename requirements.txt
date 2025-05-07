@@ -4,5 +4,4 @@ openai
 pydub
 python-dotenv
 pymongo
-gridfs
 uvicorn
