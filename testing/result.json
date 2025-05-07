@@ -198,17 +198,6 @@
     }
   },
   {
-    "audio": "41649.wav",
-    "text": "El avestruz está dotado de un apetito insaciable. Puede llenar su estómago de los alimentos más disparatados.  Es vegetariana pero muy selectiva.  Prefiere los granos, frutos y flores a las hierbas. Ingiere también piedras para triturar los alimentos y facilitar la digestión. Es activa incluso al mediodía, a las horas de máximo calor, ya que no le hace falta descansar a la sombra como los antílopes y otros mamíferos.",
-    "output": {
-      "estrategia_silabica": "Logrado",
-      "manejo_ritmo": "En proceso",
-      "manejo_respiracion": "En proceso",
-      "precision": "Logrado",
-      "fluidez_lectora": 43.6
-    }
-  },
-  {
     "audio": "41647.wav",
     "text": "El avestruz está dotado de un apetito insaciable. Puede llenar su estómago de los alimentos más disparatados.  Es vegetariana pero muy selectiva.  Prefiere los granos, frutos y flores a las hierbas. Ingiere también piedras para triturar los alimentos y facilitar la digestión. Es activa incluso al mediodía, a las horas de máximo calor, ya que no le hace falta descansar a la sombra como los antílopes y otros mamíferos.",
     "output": {

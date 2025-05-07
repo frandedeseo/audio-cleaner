@@ -19,12 +19,6 @@ class WpmService:
         active_seconds = max(0, total_ms - total_silence_ms) / 1000.0
         word_count = len(text.split())
 
-        # But internally also log:
-        print(f"  total_ms    = {len(audio)}")
-        print(f"  silent_ms   = {total_silence_ms}")
-        print(f"  active_s    = {(len(audio)-total_silence_ms)/1000:.1f}s")
-        print(f"  words       = {len(text.split())}")
-
         return word_count / (active_seconds / 60.0) if active_seconds > 0 else 0.0
 
 def main():

@@ -49,12 +49,12 @@ async def process_file(file_path: Path, services, dirs, text_map):
     )
 
     # 2) Apply noise reduction and voice separation
-    #reduced = services['noise'].reducir_ruido(audio_bytes)
-    separated = services['separator'].separar_voces(audio_bytes)
+    reduced = services['noise'].reducir_ruido(audio_bytes)
+    #separated = services['separator'].separar_voces(audio_bytes)
 
     # 3) Verify transformed
     trans_ok = await verify_and_save(
-        services['text'], separated, provided_text,
+        services['text'], reduced, provided_text,
         dirs['transformed'], filename
     )
 
