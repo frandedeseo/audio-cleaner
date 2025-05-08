@@ -23,5 +23,5 @@ async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
     
 
 @app.get("/")
-def read_root():
+def read_root():    
     return {"message": "Hello from FastAPI on Vercel"}

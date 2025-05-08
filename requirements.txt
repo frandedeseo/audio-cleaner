@@ -1,9 +1,7 @@
-#mangum
 fastapi
 openai
 pydub
 python-dotenv
-pymongo
+pymongo>=3.12
 uvicorn
 python-multipart
-
