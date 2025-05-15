@@ -41,10 +41,10 @@ Rúbrica de lectura (por niveles de desempeño):
 • Avanzado: Logra leer párrafos o textos sin errores.
 
 5. Fluidez Lectora (se mide en palabras por minuto)
-• Inicial: 0-50 palabras por minuto.
-• En proceso: 50-90 palabras por minuto.
-• Logrado: 90-130 palabras por minuto.
-• Avanzado: 130-200 palabras por minuto.
+• Inicial: 0-49 palabras por minuto = Etapa fonológica.
+• En proceso: 50-70 palabras por minuto = Etapa ortográfica.
+• Logrado: 71-90 palabras por minuto = Etapa de Transición hacia Expresiva.
+• Avanzado: 90-200 palabras por minuto = Etapa Expresiva Consolidada.
 
 Ejemplo de salida válida:
 {
