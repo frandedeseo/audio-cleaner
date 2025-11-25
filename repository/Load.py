@@ -1,6 +1,5 @@
 import os
 from pymongo import MongoClient
-import ssl
 import gridfs
 from datetime import datetime
 from dotenv import load_dotenv
@@ -9,9 +8,8 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(
     MONGO_URI,
-    ssl=True,
-    ssl_cert_reqs=ssl.CERT_REQUIRED,
-    ssl_version=ssl.PROTOCOL_TLSv1_2
+    tls=True,
+    tlsAllowInvalidCertificates=True
 )
 db = client["lecturas_db"]
 c_fs = gridfs.GridFS(db)

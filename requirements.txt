@@ -2,6 +2,6 @@ fastapi
 openai
 pydub
 python-dotenv
-pymongo>=3.12
+pymongo
 uvicorn
 python-multipart
