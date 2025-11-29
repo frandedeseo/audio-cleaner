@@ -3,7 +3,6 @@ from .TextAudioEquivalentService import TextAudioEquivalentService
 from .WpmService import WpmService
 #from .NoiseReduceService import NoiseReduceService
 from .GptService import GptService
-from repository.Load import Load # Corrected "respository" to "repository"
 #from .VoiceSeparatorService import VoiceSeparatorService
 
 class EvaluationService:
@@ -13,7 +12,6 @@ class EvaluationService:
         self.gpt = GptService()
         #self.nr = NoiseReduceService()
         #self.vs = VoiceSeparatorService()
-        self.repo = Load()
 
     async def handle(self, text: str, audio: UploadFile):
         audio_bytes = await audio.read()
@@ -34,5 +32,4 @@ class EvaluationService:
             'palabras_por_minuto': round(wpm_value, 2),
             'evaluacion': evaluation
         }
-        saved = self.repo.save(text, audio.filename, audio_bytes, record)
         return evaluation
