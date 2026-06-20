@@ -14,9 +14,19 @@ app.add_middleware(
 evaluation_service = EvaluationService()
 
 @app.post("/evaluar-lectura")
-async def evaluar_lectura(text: str = Form(...), audio: UploadFile = File(...)):
+async def evaluar_lectura(
+    text: str = Form(...), 
+    audio: UploadFile = File(...),
+    model: str = Form(default="gemini-flash")
+):
+    """
+    Parámetros:
+    - text: Texto a leer
+    - audio: Archivo de audio
+    - model: 'gemini-flash', 'gemini-pro' o 'openai-audio'
+    """
     try:
-        result = await evaluation_service.handle(text, audio)
+        result = await evaluation_service.handle(text, audio, model)
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

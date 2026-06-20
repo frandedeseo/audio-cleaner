@@ -4,3 +4,4 @@ pydub
 python-dotenv
 uvicorn
 python-multipart
+google-generativeai

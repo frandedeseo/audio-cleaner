@@ -1,23 +1,20 @@
 from fastapi import UploadFile
 from .TextAudioEquivalentService import TextAudioEquivalentService
 from .WpmService import WpmService
+from .strategies import EvaluationStrategyFactory
 #from .NoiseReduceService import NoiseReduceService
-from .GptService import GptService
 #from .VoiceSeparatorService import VoiceSeparatorService
 
 class EvaluationService:
     def __init__(self):
         self.text_audio = TextAudioEquivalentService()
         self.wpm = WpmService()
-        self.gpt = GptService()
         #self.nr = NoiseReduceService()
         #self.vs = VoiceSeparatorService()
 
-    async def handle(self, text: str, audio: UploadFile):
+    async def handle(self, text: str, audio: UploadFile, model: str = "gemini-flash"):
+        """Evalúa lectura con modelo especificado."""
         audio_bytes = await audio.read()
-
-        #audio_bytes = self.vs.separar_voces(audio_bytes)
-        #audio_bytes = self.nr.reducir_ruido(audio_bytes)
 
         match_info = await self.text_audio.verify(audio_bytes, text)
         if not match_info['match']:
@@ -25,11 +22,15 @@ class EvaluationService:
                 "error": "El texto proporcionado no coincide con el audio.",
                 **match_info
             }
+        
         wpm_value = self.wpm.calculate(audio_bytes, text)
-        evaluation = await self.gpt.evaluate(text, wpm_value, audio_bytes)
-        record = {
+        
+        strategy = EvaluationStrategyFactory.create(model)
+        evaluation = await strategy.evaluate(text, wpm_value, audio_bytes)
+        
+        return {
             **match_info,
             'palabras_por_minuto': round(wpm_value, 2),
+            'modelo': model,
             'evaluacion': evaluation
         }
-        return evaluation
