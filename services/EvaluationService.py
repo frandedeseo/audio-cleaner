@@ -7,7 +7,7 @@ from .strategies import EvaluationStrategyFactory
 
 class EvaluationService:
     def __init__(self):
-        self.text_audio = TextAudioEquivalentService()
+        #self.text_audio = TextAudioEquivalentService()
         self.wpm = WpmService()
         #self.nr = NoiseReduceService()
         #self.vs = VoiceSeparatorService()
@@ -16,12 +16,12 @@ class EvaluationService:
         """Evalúa lectura con modelo especificado."""
         audio_bytes = await audio.read()
 
-        match_info = await self.text_audio.verify(audio_bytes, text)
-        if not match_info['match']:
-            return {
-                "error": "El texto proporcionado no coincide con el audio.",
-                **match_info
-            }
+        #match_info = await self.text_audio.verify(audio_bytes, text)
+        #if not match_info['match']:
+        #    return {
+        #        "error": "El texto proporcionado no coincide con el audio.",
+        #        **match_info
+        #    }
         
         wpm_value = self.wpm.calculate(audio_bytes, text)
         
@@ -29,7 +29,7 @@ class EvaluationService:
         evaluation = await strategy.evaluate(text, wpm_value, audio_bytes)
         
         return {
-            **match_info,
+            #**match_info,
             'palabras_por_minuto': round(wpm_value, 2),
             'modelo': model,
             'evaluacion': evaluation
