@@ -21,10 +21,10 @@ class EvaluacionLectura(BaseModel):
     fluidez_lectora: Criterio
 
 
-class GeminiEvaluationStrategy(AudioEvaluationStrategy):
+class GeminiProEvaluationStrategy(AudioEvaluationStrategy):
     """Estrategia usando Gemini 3.1 Preview (stable, rápido)."""
 
-    MODEL = "gemini-3.1-preview"
+    MODEL = "gemini-3.1-pro-preview"
 
     def __init__(self):
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -44,4 +44,4 @@ class GeminiEvaluationStrategy(AudioEvaluationStrategy):
             )
             return response.parsed.model_dump() if response.parsed else __import__("json").loads(response.text)
         except Exception as e:
-            raise Exception(f"Error Gemini Flash: {str(e)}")
+            raise Exception(f"Error Gemini Pro: {str(e)}")
